@@ -1,5 +1,6 @@
 mod instructions;
 mod state;
+mod utils;
 use anchor_lang::prelude::*;
 use instructions::init_staking::*;
 use instructions::stake::*;
@@ -31,4 +32,10 @@ pub enum StakeError {
     InvalidCollection,
     #[msg("the staking is not currently active")]
     StakingInactive,
+    #[msg("Unable To Subtract")]
+    ProgramSubError,
+    #[msg("Unable To Multiply")]
+    ProgramMulError,
+    #[msg("Failed to convert the time to u64")]
+    FailedTimeConversion,
 }
