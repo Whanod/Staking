@@ -3,10 +3,10 @@ mod state;
 use anchor_lang::prelude::*;
 use instructions::init_staking::*;
 use instructions::stake::*;
-declare_id!("ANcqthEwGEQwKh7JoPLTsbW3atyf1civUBnQ22iTgRH1");
+declare_id!("ATfdE39GhVCzGEeX8kVnbPwb1Uur7fBX8jCU1SrL3Swq");
 
 #[program]
-pub mod nft_stake {
+pub mod staking {
 
     use super::*;
     pub fn init(ctx: Context<InitStaking>, reward: u64) -> Result<()> {
