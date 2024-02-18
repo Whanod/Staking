@@ -2,6 +2,7 @@ mod instructions;
 mod state;
 mod utils;
 use anchor_lang::prelude::*;
+use instructions::claim_reward::*;
 use instructions::init_staking::*;
 use instructions::stake::*;
 declare_id!("ATfdE39GhVCzGEeX8kVnbPwb1Uur7fBX8jCU1SrL3Swq");
@@ -16,6 +17,10 @@ pub mod staking {
 
     pub fn stake(ctx: Context<Stake>, staking_period: u8) -> Result<()> {
         stake_handler(ctx, staking_period)
+    }
+
+    pub fn claim(ctx: Context<ClaimReward>) -> Result<()> {
+        claim_handler(ctx)
     }
 }
 #[error_code]

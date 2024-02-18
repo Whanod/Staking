@@ -12,16 +12,16 @@ use crate::StakeError;
 pub struct Stake<'info> {
     #[account(seeds=[b"stake",stake_details.collection.as_ref(),stake_details.creator.as_ref()],bump=stake_details.stake_bump)]
     pub stake_details: Account<'info, Deatils>,
-    #[account(init,payer=user,space=StakingRecord::LEN,seeds=[b"staking_record",stake_details.key().as_ref(),nft_mint.key().as_ref()],bump)]
+    #[account(init,payer=staker,space=StakingRecord::LEN,seeds=[b"staking_record",stake_details.key().as_ref(),nft_mint.key().as_ref()],bump)]
     pub staking_record: Account<'info, StakingRecord>,
     pub system_program: Program<'info, System>,
     #[account(mut)]
-    pub user: Signer<'info>,
+    pub staker: Signer<'info>,
     #[account(mint::decimals = 0,constraint= nft_mint.supply == 1 @ StakeError::TokenNotNFT )]
     pub nft_mint: Account<'info, Mint>,
     pub token_program: Program<'info, Token>,
     pub associated_token_program: Program<'info, AssociatedToken>,
-    #[account(mut,associated_token::mint= nft_mint, associated_token::authority = user,constraint= nft_token.amount ==1 @ StakeError::TokenAccountEmpty)]
+    #[account(mut,associated_token::mint= nft_mint, associated_token::authority = staker,constraint= nft_token.amount ==1 @ StakeError::TokenAccountEmpty)]
     pub nft_token: Account<'info, TokenAccount>,
     #[account(
         seeds = [
@@ -49,7 +49,7 @@ pub struct Stake<'info> {
     pub nft_authority: UncheckedAccount<'info>,
     #[account(
         init,
-        payer = user,
+        payer = staker,
         associated_token::mint = nft_mint,
         associated_token::authority = nft_authority
     )]
@@ -60,7 +60,7 @@ impl<'info> Stake<'info> {
         let cpi_accounts = Transfer {
             from: self.nft_token.to_account_info(),
             to: self.nft_authority.to_account_info(),
-            authority: self.user.to_account_info(),
+            authority: self.staker.to_account_info(),
         };
         let cpi_program = self.token_program.to_account_info();
         CpiContext::new(cpi_program, cpi_accounts)
@@ -76,7 +76,7 @@ pub fn stake_handler(ctx: Context<Stake>, staking_period: u8) -> Result<()> {
 
     let staking_status = ctx.accounts.stake_details.is_active;
     require_eq!(staking_status, true, StakeError::StakingInactive);
-    let user = ctx.accounts.user.key();
+    let user = ctx.accounts.staker.key();
     let nft_mint = ctx.accounts.nft_mint.key();
     let bump = ctx.bumps.staking_record;
     transfer(ctx.accounts.transfer_nft_ctx(), 1)?;
