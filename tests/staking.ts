@@ -1,30 +1,19 @@
 import * as anchor from "@project-serum/anchor";
 import { exec } from "child_process";
 import { utils, BN } from "@project-serum/anchor";
-import { Ed25519Keypair, Keypair, PublicKey } from "@solana/web3.js";
+import { PublicKey } from "@solana/web3.js";
 import { Program } from "@project-serum/anchor";
-import { expect } from "chai";
+
 import * as spl from "@solana/spl-token";
 import { Staking } from "../target/types/staking";
-import { NftData, createNft, upload_metdata } from "./nft";
-import { readFileSync } from "fs";
+import { upload_metdata } from "./nft";
+
 import {
-  CreateTokenWithMintOutput,
-  FindNftByMintInput,
   Metaplex,
-  Nft,
-  SelectedGuardGroupDoesNotExistError,
   Signer,
-  SplTokenAmount,
-  WalletAdapterIdentityDriver,
-  createTokenWithMintOperation,
-  keypairIdentity,
   mockStorage,
   toBigNumber,
-  toCandyMachineV2InstructionData,
-  toMetaplexFile,
   walletAdapterIdentity,
-  withdrawFromTreasuryAccountBuilder,
 } from "@metaplex-foundation/js";
 import { associatedAddress } from "@project-serum/anchor/dist/cjs/utils/token";
 import { findProgramAddressSync } from "@project-serum/anchor/dist/cjs/utils/pubkey";
@@ -54,6 +43,7 @@ describe("anchor-staking-nft", () => {
   let staking_record;
   let nft_custody;
   let token;
+  let user_token_address;
 
   it("Is initialized!", async () => {
     const program = anchor.workspace.Staking as Program<Staking>;
@@ -118,7 +108,7 @@ describe("anchor-staking-nft", () => {
         basisPoints: toBigNumber(100000),
         currency: {
           symbol: "FUR",
-          decimals: 1,
+          decimals: 6,
           namespace: "spl-token",
         },
       },
@@ -126,7 +116,7 @@ describe("anchor-staking-nft", () => {
 
     token_mint = output.token.mint.address;
     token_account = output.token.address;
-    let user_token_address = await associatedAddress({
+    user_token_address = await associatedAddress({
       mint: token_mint,
       owner: provider.publicKey,
     });
@@ -134,7 +124,7 @@ describe("anchor-staking-nft", () => {
       provider.connection,
       user_token_address
     );
-    console.log("token amoumt", user_token_account.amount.toString());
+    console.log("token amount", user_token_account.amount.toString());
 
     [stake_details] = findProgramAddressSync(
       [
@@ -198,9 +188,9 @@ describe("anchor-staking-nft", () => {
     });
     console.log(parsed_tx.blockTime);
   });
+  const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
 
   it("Claim Reward", async () => {
-    const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
     await delay(1000);
 
     const tx = await program.methods
@@ -218,7 +208,7 @@ describe("anchor-staking-nft", () => {
     });
     console.log(parsed_tx.blockTime);
 
-    let user_token_address = await associatedAddress({
+    user_token_address = await associatedAddress({
       mint: token_mint,
       owner: provider.publicKey,
     });
@@ -228,5 +218,21 @@ describe("anchor-staking-nft", () => {
     );
 
     console.log("token amount", user_token_account.amount.toString());
+  });
+  it("Unstake NFT", async () => {
+    await program.methods
+      .unstake()
+      .accounts({
+        stakeDetails: stake_details,
+        stakingRecord: staking_record,
+        rewardMint: token_mint,
+        rewardReceiveAccount: user_token_address,
+        tokenAuthority: token_authority,
+        nftAuthority: nft_authority,
+        nftCustody: nft_custody,
+        nftMint: nft_mint,
+        nftReceiveAccount: nft_token,
+      })
+      .rpc();
   });
 });

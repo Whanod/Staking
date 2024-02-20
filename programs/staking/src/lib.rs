@@ -2,7 +2,7 @@ mod instructions;
 mod state;
 mod utils;
 use anchor_lang::prelude::*;
-use instructions::{claim_reward::*, init_staking::*, stake::*};
+use instructions::{claim_reward::*, init_staking::*, stake::*, unstake::*};
 
 declare_id!("ATfdE39GhVCzGEeX8kVnbPwb1Uur7fBX8jCU1SrL3Swq");
 
@@ -20,6 +20,9 @@ pub mod staking {
 
     pub fn claim(ctx: Context<ClaimReward>) -> Result<()> {
         claim_handler(ctx)
+    }
+    pub fn unstake(ctx: Context<Unstake>) -> Result<()> {
+        unstake_handler(ctx)
     }
 }
 #[error_code]
@@ -42,4 +45,6 @@ pub enum StakeError {
     ProgramMulError,
     #[msg("Failed to convert the time to u64")]
     FailedTimeConversion,
+    #[msg("Staking Period is not over yet")]
+    UnStakePeriodError,
 }
