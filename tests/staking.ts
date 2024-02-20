@@ -1,16 +1,19 @@
 import * as anchor from "@project-serum/anchor";
+import { exec } from "child_process";
 import { utils, BN } from "@project-serum/anchor";
 import { Ed25519Keypair, Keypair, PublicKey } from "@solana/web3.js";
 import { Program } from "@project-serum/anchor";
 import { expect } from "chai";
-import * as token from "@solana/spl-token";
+import * as spl from "@solana/spl-token";
 import { Staking } from "../target/types/staking";
 import { NftData, createNft, upload_metdata } from "./nft";
 import { readFileSync } from "fs";
 import {
+  CreateTokenWithMintOutput,
   FindNftByMintInput,
   Metaplex,
   Nft,
+  SelectedGuardGroupDoesNotExistError,
   Signer,
   SplTokenAmount,
   WalletAdapterIdentityDriver,
@@ -18,13 +21,15 @@ import {
   keypairIdentity,
   mockStorage,
   toBigNumber,
+  toCandyMachineV2InstructionData,
   toMetaplexFile,
   walletAdapterIdentity,
+  withdrawFromTreasuryAccountBuilder,
 } from "@metaplex-foundation/js";
 import { associatedAddress } from "@project-serum/anchor/dist/cjs/utils/token";
 import { findProgramAddressSync } from "@project-serum/anchor/dist/cjs/utils/pubkey";
 
-describe("anchor-counter", () => {
+describe("anchor-staking-nft", () => {
   // Configure the client to use the local cluster.
   const provider = anchor.AnchorProvider.local();
   anchor.setProvider(provider);
@@ -36,6 +41,19 @@ describe("anchor-counter", () => {
   const programId = new PublicKey(
     "ATfdE39GhVCzGEeX8kVnbPwb1Uur7fBX8jCU1SrL3Swq"
   );
+  let collection_address: PublicKey;
+  let token_mint: PublicKey;
+  let token_account: PublicKey;
+  let nft_mint: PublicKey;
+  let nft_token: PublicKey;
+  let nft_edition: PublicKey;
+  let nft_metadata: PublicKey;
+  let stake_details;
+  let token_authority;
+  let nft_authority;
+  let staking_record;
+  let nft_custody;
+  let token;
 
   it("Is initialized!", async () => {
     const program = anchor.workspace.Staking as Program<Staking>;
@@ -47,13 +65,6 @@ describe("anchor-counter", () => {
       sellerFeeBasisPoints: 100,
       imageFile: "solana.png",
     };
-    let collection_address: PublicKey;
-    let token_mint: PublicKey;
-    let token_account: PublicKey;
-    let nft_mint: PublicKey;
-    let nft_token: PublicKey;
-    let nft_edition: PublicKey;
-    let nft_metadata: PublicKey;
 
     const uri = await upload_metdata(meta, nftData);
     const collection = await meta.nfts().create(
@@ -100,7 +111,7 @@ describe("anchor-counter", () => {
     nft_edition = nft.edition.address;
     collection_address = collection.mintAddress;
 
-    let { token } = await meta.tokens().createTokenWithMint({
+    let output = await meta.tokens().createTokenWithMint({
       mintAuthority: provider.wallet as Signer,
       decimals: 1,
       initialSupply: {
@@ -112,10 +123,20 @@ describe("anchor-counter", () => {
         },
       },
     });
-    token_mint = token.mint.address;
-    token_account = token.address;
 
-    const [stake_details] = findProgramAddressSync(
+    token_mint = output.token.mint.address;
+    token_account = output.token.address;
+    let user_token_address = await associatedAddress({
+      mint: token_mint,
+      owner: provider.publicKey,
+    });
+    let user_token_account = await spl.getAccount(
+      provider.connection,
+      user_token_address
+    );
+    console.log("token amoumt", user_token_account.amount.toString());
+
+    [stake_details] = findProgramAddressSync(
       [
         utils.bytes.utf8.encode("stake"),
         collection_address.toBytes(),
@@ -123,12 +144,25 @@ describe("anchor-counter", () => {
       ],
       programId
     );
-    const [token_authority] = findProgramAddressSync(
+    [token_authority] = findProgramAddressSync(
       [utils.bytes.utf8.encode("token-authority"), stake_details.toBytes()],
       programId
     );
-    const [nft_authority] = PublicKey.findProgramAddressSync(
+    [nft_authority] = PublicKey.findProgramAddressSync(
       [utils.bytes.utf8.encode("nft-authority"), stake_details.toBytes()],
+      programId
+    );
+    nft_custody = await spl.getAssociatedTokenAddress(
+      nft_mint,
+      nft_authority,
+      true
+    );
+    [staking_record] = PublicKey.findProgramAddressSync(
+      [
+        utils.bytes.utf8.encode("staking-record"),
+        stake_details.toBytes(),
+        nft_mint.toBytes(),
+      ],
       programId
     );
 
@@ -141,9 +175,58 @@ describe("anchor-counter", () => {
         nftAuthority: nft_authority,
         tokenAuthority: token_authority,
       })
-      .rpc();
-    console.log(tx);
+      .rpc({ commitment: "confirmed" });
   });
 
-  it("Stake NFT", async () => {});
+  it("Stake NFT", async () => {
+    const tx = await program.methods
+      .stake(2)
+      .accounts({
+        stakeDetails: stake_details,
+        nftAuthority: nft_authority,
+        stakingRecord: staking_record,
+        nftMint: nft_mint,
+        nftEdition: nft_edition,
+        nftMetadata: nft_metadata,
+        nftToken: nft_token,
+        nftCustody: nft_custody,
+      })
+
+      .rpc({ commitment: "confirmed" });
+    let parsed_tx = await provider.connection.getParsedTransaction(tx, {
+      commitment: "confirmed",
+    });
+    console.log(parsed_tx.blockTime);
+  });
+
+  it("Claim Reward", async () => {
+    const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
+    await delay(1000);
+
+    const tx = await program.methods
+      .claim()
+      .accounts({
+        stakeDetails: stake_details,
+        stakingRecord: staking_record,
+        rewardMint: token_mint,
+        rewardReceiveAccount: token_account,
+        tokenAuthority: token_authority,
+      })
+      .rpc({ commitment: "confirmed" });
+    let parsed_tx = await provider.connection.getParsedTransaction(tx, {
+      commitment: "confirmed",
+    });
+    console.log(parsed_tx.blockTime);
+
+    let user_token_address = await associatedAddress({
+      mint: token_mint,
+      owner: provider.publicKey,
+    });
+    let user_token_account = await spl.getAccount(
+      provider.connection,
+      user_token_address
+    );
+
+    console.log("token amount", user_token_account.amount.toString());
+  });
 });

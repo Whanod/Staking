@@ -12,7 +12,7 @@ use crate::StakeError;
 pub struct Stake<'info> {
     #[account(seeds=[b"stake",stake_details.collection.as_ref(),stake_details.creator.as_ref()],bump=stake_details.stake_bump)]
     pub stake_details: Account<'info, Deatils>,
-    #[account(init,payer=staker,space=StakingRecord::LEN,seeds=[b"staking_record",stake_details.key().as_ref(),nft_mint.key().as_ref()],bump)]
+    #[account(init,payer=staker,space=StakingRecord::LEN+8,seeds=[b"staking-record",stake_details.key().as_ref(),nft_mint.key().as_ref()],bump)]
     pub staking_record: Account<'info, StakingRecord>,
     pub system_program: Program<'info, System>,
     #[account(mut)]
@@ -59,7 +59,7 @@ impl<'info> Stake<'info> {
     pub fn transfer_nft_ctx(&self) -> CpiContext<'_, '_, '_, 'info, Transfer<'info>> {
         let cpi_accounts = Transfer {
             from: self.nft_token.to_account_info(),
-            to: self.nft_authority.to_account_info(),
+            to: self.nft_custody.to_account_info(),
             authority: self.staker.to_account_info(),
         };
         let cpi_program = self.token_program.to_account_info();
@@ -67,7 +67,7 @@ impl<'info> Stake<'info> {
     }
 }
 pub fn stake_handler(ctx: Context<Stake>, staking_period: u8) -> Result<()> {
-    let periods: Vec<u8> = vec![30, 60, 90];
+    let periods: Vec<u8> = vec![2, 4, 6, 12, 24];
     require_eq!(
         periods.contains(&staking_period),
         true,

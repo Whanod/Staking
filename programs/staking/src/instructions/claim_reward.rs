@@ -3,7 +3,7 @@ use crate::{
     utils::calc_reward::calc_reward,
     StakeError,
 };
-use anchor_lang::{context, prelude::*};
+use anchor_lang::prelude::*;
 use anchor_spl::{
     associated_token::AssociatedToken,
     token::{mint_to, Mint, MintTo, Token, TokenAccount},
@@ -19,7 +19,7 @@ pub struct ClaimReward<'info> {
     #[account(mut)]
     pub staker: Signer<'info>,
     #[account(mut,seeds = [
-        b"nft-record", 
+        b"staking-record", 
         stake_details.key().as_ref(),
         staking_record.nft_mint.as_ref(),
     ],

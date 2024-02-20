@@ -2,9 +2,8 @@ mod instructions;
 mod state;
 mod utils;
 use anchor_lang::prelude::*;
-use instructions::claim_reward::*;
-use instructions::init_staking::*;
-use instructions::stake::*;
+use instructions::{claim_reward::*, init_staking::*, stake::*};
+
 declare_id!("ATfdE39GhVCzGEeX8kVnbPwb1Uur7fBX8jCU1SrL3Swq");
 
 #[program]

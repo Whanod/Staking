@@ -53,8 +53,6 @@ export async function createNft(
     { commitment: "finalized" }
   );
 
-  console.log(nft.address.toString());
-
   return nft as NftWithToken;
 }
 
@@ -74,8 +72,6 @@ export async function upload_metdata(
 
   const imageUri = await metaplex.storage().upload(file);
 
-  console.log("image uri:", imageUri);
-
   // upload metadata and get metadata uri (off chain metadata)
 
   const { uri } = await metaplex.nfts().uploadMetadata({
@@ -87,8 +83,6 @@ export async function upload_metdata(
 
     image: imageUri,
   });
-
-  console.log("metadata uri:", uri);
 
   return uri;
 }
