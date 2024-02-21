@@ -2,7 +2,7 @@ mod instructions;
 mod state;
 mod utils;
 use anchor_lang::prelude::*;
-use instructions::{claim_reward::*, init_staking::*, stake::*, unstake::*};
+use instructions::{claim_reward::*, close_staking::*, init_staking::*, stake::*, unstake::*};
 
 declare_id!("ATfdE39GhVCzGEeX8kVnbPwb1Uur7fBX8jCU1SrL3Swq");
 
@@ -23,6 +23,9 @@ pub mod staking {
     }
     pub fn unstake(ctx: Context<Unstake>) -> Result<()> {
         unstake_handler(ctx)
+    }
+    pub fn close_staking(ctx: Context<CloseStaking>) -> Result<()> {
+        close_staking_handler(ctx)
     }
 }
 #[error_code]

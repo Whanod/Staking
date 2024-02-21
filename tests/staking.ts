@@ -17,6 +17,7 @@ import {
 } from "@metaplex-foundation/js";
 import { associatedAddress } from "@project-serum/anchor/dist/cjs/utils/token";
 import { findProgramAddressSync } from "@project-serum/anchor/dist/cjs/utils/pubkey";
+import { expect } from "chai";
 
 describe("anchor-staking-nft", () => {
   // Configure the client to use the local cluster.
@@ -232,6 +233,17 @@ describe("anchor-staking-nft", () => {
         nftCustody: nft_custody,
         nftMint: nft_mint,
         nftReceiveAccount: nft_token,
+      })
+      .rpc({ commitment: "confirmed" });
+  });
+
+  it("Closes Staking", async () => {
+    const tx = await program.methods
+      .closeStaking()
+      .accounts({
+        stakeDetails: stake_details,
+        tokenMint: token_mint,
+        tokenAuthority: token_authority,
       })
       .rpc();
   });
