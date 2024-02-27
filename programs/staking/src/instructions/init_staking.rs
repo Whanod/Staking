@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token::{set_authority, Mint, SetAuthority, Token};
 
-use crate::state::stake_details::Deatils;
+use crate::state::{events::InitEvent, stake_details::Deatils};
 
 #[derive(Accounts)]
 pub struct InitStaking<'info> {
@@ -54,7 +54,7 @@ pub fn init_staking_handler(ctx: Context<InitStaking>, reward: u64) -> Result<()
     let token_auth_bump = ctx.bumps.token_authority;
     let nft_auth_bump = ctx.bumps.nft_authority;
     let token_authority = ctx.accounts.token_authority.key();
-
+    let current_time = Clock::get()?.unix_timestamp;
     set_authority(
         ctx.accounts.transfer_auth(),
         anchor_spl::token::spl_token::instruction::AuthorityType::MintTokens,
@@ -71,6 +71,12 @@ pub fn init_staking_handler(ctx: Context<InitStaking>, reward: u64) -> Result<()
         token_auth_bump,
         nft_auth_bump,
     );
+    emit!(InitEvent {
+        creator: creator,
+        collection_mint: collection,
+        reward_mint: reward_mint,
+        init_at: current_time
+    });
 
     Ok(())
 }

@@ -1,5 +1,5 @@
 use crate::{
-    state::{stake_details::Deatils, staking_record::StakingRecord},
+    state::{events::ClaimEvent, stake_details::Deatils, staking_record::StakingRecord},
     utils::calc_reward::calc_reward,
     StakeError,
 };
@@ -81,5 +81,13 @@ pub fn claim_handler(ctx: Context<ClaimReward>) -> Result<()> {
         reward_tokens,
     )?;
     ctx.accounts.staking_record.last_claimed = current_time;
+    emit!(ClaimEvent {
+        reward: reward_tokens,
+        reward_mint: ctx.accounts.reward_mint.key(),
+        collection_mint: ctx.accounts.stake_details.collection.key(),
+        nft_mint: ctx.accounts.staking_record.nft_mint.key(),
+        staker: ctx.accounts.staking_record.staker.key(),
+        claimed_at: current_time
+    });
     Ok(())
 }

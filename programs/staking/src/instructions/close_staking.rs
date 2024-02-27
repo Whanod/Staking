@@ -1,4 +1,7 @@
-use crate::{state::stake_details::Deatils, StakeError};
+use crate::{
+    state::{events::CloseEvent, stake_details::Deatils},
+    StakeError,
+};
 use anchor_lang::prelude::*;
 use anchor_spl::token::{
     set_authority, spl_token::instruction::AuthorityType, Mint, SetAuthority, Token,
@@ -58,6 +61,7 @@ pub fn close_staking_handler(ctx: Context<CloseStaking>) -> Result<()> {
     let token_auth_bump = stake_details.token_auth_bump;
     let stake_details_key = stake_details.key();
     let creator = ctx.accounts.creator.key();
+    let current_time = Clock::get()?.unix_timestamp;
 
     require_eq!(staking_status, true, StakeError::StakingInactive);
 
@@ -75,5 +79,11 @@ pub fn close_staking_handler(ctx: Context<CloseStaking>) -> Result<()> {
         Some(creator),
     )?;
 
+    emit!(CloseEvent {
+        creator: stake_details.creator,
+        reward_mint: stake_details.reward_mint,
+        closed_at: current_time,
+        collection_mint: stake_details.collection
+    });
     ctx.accounts.stake_details.close_staking()
 }

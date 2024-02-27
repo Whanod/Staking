@@ -1,5 +1,5 @@
 use crate::{
-    state::{stake_details::*, staking_record::StakingRecord},
+    state::{events::UnstakeEvent, stake_details::*, staking_record::StakingRecord},
     utils::calc_reward::calc_reward,
     StakeError,
 };
@@ -136,6 +136,13 @@ pub fn unstake_handler(ctx: Context<Unstake>) -> Result<()> {
             .close_account_ctx()
             .with_signer(&[&nft_auth_seed[..]]),
     )?;
+    emit!(UnstakeEvent {
+        staker: ctx.accounts.staker.key(),
+        nft_mint: ctx.accounts.nft_mint.key(),
+        collection_mint: ctx.accounts.stake_details.collection.key(),
+        staked_at: staked_at,
+        unstaked_at: current_time,
+    });
 
     Ok(())
 }

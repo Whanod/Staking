@@ -1,11 +1,12 @@
 use anchor_lang::prelude::*;
+use anchor_lang::solana_program::clock;
 use anchor_spl::associated_token::AssociatedToken;
 use anchor_spl::metadata::{Metadata, MetadataAccount};
 
 use anchor_spl::metadata::MasterEditionAccount;
 use anchor_spl::token::{transfer, Mint, Token, TokenAccount, Transfer};
 
-use crate::state::{stake_details::Deatils, staking_record::StakingRecord};
+use crate::state::{events::StakeEvent, stake_details::Deatils, staking_record::StakingRecord};
 use crate::StakeError;
 
 #[derive(Accounts)]
@@ -73,6 +74,8 @@ pub fn stake_handler(ctx: Context<Stake>, staking_period: u8) -> Result<()> {
         true,
         StakeError::StakePeriodError
     );
+    let clock = clock::Clock::get()?;
+    let current_time = clock.unix_timestamp;
 
     let staking_status = ctx.accounts.stake_details.is_active;
     require_eq!(staking_status, true, StakeError::StakingInactive);
@@ -82,5 +85,12 @@ pub fn stake_handler(ctx: Context<Stake>, staking_period: u8) -> Result<()> {
     transfer(ctx.accounts.transfer_nft_ctx(), 1)?;
     let staking_record = &mut ctx.accounts.staking_record;
     **staking_record = StakingRecord::init(user, nft_mint, bump, staking_period);
+    emit!(StakeEvent {
+        staker: user,
+        staking_period: staking_period,
+        staked_at: current_time,
+        nft_mint: nft_mint,
+        collection_mint: ctx.accounts.stake_details.collection
+    });
     Ok(())
 }
