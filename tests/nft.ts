@@ -5,7 +5,6 @@ import {
   Signer,
   toMetaplexFile,
 } from "@metaplex-foundation/js";
-import { getProvider } from "@project-serum/anchor";
 import { readFileSync } from "fs";
 
 export interface NftData {

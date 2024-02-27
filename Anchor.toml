@@ -31,3 +31,6 @@ bind_address = "0.0.0.0"
 url = "https://api.devnet.solana.com"
 ledger = ".anchor/test-ledger"
 rpc_port = 8899
+
+[workspace]
+types = "app/src/idl/"
