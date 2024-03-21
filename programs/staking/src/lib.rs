@@ -50,4 +50,6 @@ pub enum StakeError {
     FailedTimeConversion,
     #[msg("Staking Period is not over yet")]
     UnStakePeriodError,
+    #[msg("Claim Is Not Active yet")]
+    ClaimError,
 }

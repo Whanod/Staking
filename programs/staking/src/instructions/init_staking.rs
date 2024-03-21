@@ -63,6 +63,7 @@ pub fn init_staking_handler(ctx: Context<InitStaking>, reward: u64) -> Result<()
     let stake_details = &mut ctx.accounts.stake_details;
 
     **stake_details = Deatils::init(
+        current_time,
         creator,
         reward_mint,
         reward,

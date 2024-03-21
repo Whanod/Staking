@@ -68,7 +68,7 @@ impl<'info> Stake<'info> {
     }
 }
 pub fn stake_handler(ctx: Context<Stake>, staking_period: u8) -> Result<()> {
-    let periods: Vec<u8> = vec![2, 4, 6, 12, 24];
+    let periods: Vec<u8> = vec![2, 4, 6, 12];
     require_eq!(
         periods.contains(&staking_period),
         true,

@@ -285,6 +285,10 @@ export type Staking = {
         "kind": "struct",
         "fields": [
           {
+            "name": "initAt",
+            "type": "i64"
+          },
+          {
             "name": "isActive",
             "type": "bool"
           },
@@ -549,6 +553,11 @@ export type Staking = {
       "code": 6009,
       "name": "UnStakePeriodError",
       "msg": "Staking Period is not over yet"
+    },
+    {
+      "code": 6010,
+      "name": "ClaimError",
+      "msg": "Claim Is Not Active yet"
     }
   ]
 };
@@ -840,6 +849,10 @@ export const IDL: Staking = {
         "kind": "struct",
         "fields": [
           {
+            "name": "initAt",
+            "type": "i64"
+          },
+          {
             "name": "isActive",
             "type": "bool"
           },
@@ -1104,6 +1117,11 @@ export const IDL: Staking = {
       "code": 6009,
       "name": "UnStakePeriodError",
       "msg": "Staking Period is not over yet"
+    },
+    {
+      "code": 6010,
+      "name": "ClaimError",
+      "msg": "Claim Is Not Active yet"
     }
   ]
 };

@@ -88,6 +88,8 @@ impl<'info> Unstake<'info> {
     }
 }
 pub fn unstake_handler(ctx: Context<Unstake>) -> Result<()> {
+    //change to 2592000 in production
+    const SECONDS_IN_A_MONTH: i64 = 2592000;
     let stake_details = &ctx.accounts.stake_details;
     let staked_at = ctx.accounts.staking_record.staked_at;
     let staking_active = stake_details.is_active;
@@ -99,10 +101,10 @@ pub fn unstake_handler(ctx: Context<Unstake>) -> Result<()> {
     let current_time = clock.unix_timestamp;
     let staking_period_i64 = staking_period as i64;
     let stake_details_key = stake_details.key();
-    //change to 2592000 in production
+
     require_gt!(
         current_time,
-        staked_at + (3600 * staking_period_i64),
+        staked_at + (SECONDS_IN_A_MONTH * staking_period_i64),
         StakeError::UnStakePeriodError
     );
     let base_reward = ctx.accounts.stake_details.reward;

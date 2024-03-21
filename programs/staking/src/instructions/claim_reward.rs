@@ -60,13 +60,22 @@ impl<'info> ClaimReward<'info> {
     }
 }
 pub fn claim_handler(ctx: Context<ClaimReward>) -> Result<()> {
+    const SECONDS_IN_A_MONTH: i64 = 2592000;
+    let init_at: i64 = ctx.accounts.stake_details.init_at;
+
     let staking_status = ctx.accounts.stake_details.is_active;
     require_eq!(staking_status, true, StakeError::StakingInactive);
+
     let claimed_last = ctx.accounts.staking_record.last_claimed;
     let staking_period = ctx.accounts.staking_record.staking_period;
     let base_reward = ctx.accounts.stake_details.reward;
     let (reward_tokens, current_time) =
         calc_reward(claimed_last, staking_period, base_reward).unwrap();
+    require_gt!(
+        current_time,
+        init_at + SECONDS_IN_A_MONTH,
+        StakeError::ClaimError
+    );
     let token_auth_bump = ctx.accounts.stake_details.token_auth_bump;
     let stake_details_key = ctx.accounts.stake_details.key();
     let authority_seed = &[
