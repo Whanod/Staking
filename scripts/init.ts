@@ -41,7 +41,7 @@ const main = async () => {
   );
 
   let tx = await program.methods
-    .init(new BN(500))
+    .init(new BN(50))
     .accounts({
       stakeDetails: stake_details,
       tokenMint: tokenMintAccount,

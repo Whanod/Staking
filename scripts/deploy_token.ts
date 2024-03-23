@@ -71,7 +71,7 @@ const main = async () => {
     mintAccount,
     tokenAccount.address,
     senderKey,
-    100 * decimals
+    100_000_000 * decimals
   );
   console.log(mintAccount);
 };

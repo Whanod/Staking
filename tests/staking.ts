@@ -7,10 +7,13 @@ import { Program } from "@project-serum/anchor";
 import * as spl from "@solana/spl-token";
 import { Staking } from "../target/types/staking";
 import { upload_metdata } from "./nft";
+import "dotenv/config";
+import { getKeypairFromEnvironment } from "@solana-developers/node-helpers";
 
 import {
   Metaplex,
   Signer,
+  amount,
   mockStorage,
   toBigNumber,
   walletAdapterIdentity,
@@ -23,6 +26,7 @@ describe("anchor-staking-nft", () => {
   // Configure the client to use the local cluster.
   const provider = anchor.AnchorProvider.local();
   anchor.setProvider(provider);
+  const ownerWallet = getKeypairFromEnvironment("SECRET_KEY");
 
   const meta = Metaplex.make(provider.connection)
     .use(walletAdapterIdentity(provider.wallet))
@@ -45,7 +49,7 @@ describe("anchor-staking-nft", () => {
   let nft_custody;
   let token;
   let user_token_address;
-
+  let decimals = 1_000_000;
   it("Is initialized!", async () => {
     const program = anchor.workspace.Staking as Program<Staking>;
 
@@ -104,9 +108,9 @@ describe("anchor-staking-nft", () => {
 
     let output = await meta.tokens().createTokenWithMint({
       mintAuthority: provider.wallet as Signer,
-      decimals: 1,
+      decimals: 6,
       initialSupply: {
-        basisPoints: toBigNumber(100000),
+        basisPoints: toBigNumber(0),
         currency: {
           symbol: "FUR",
           decimals: 6,
@@ -158,7 +162,7 @@ describe("anchor-staking-nft", () => {
     );
 
     let tx = await program.methods
-      .init(new BN(500))
+      .init(new BN(50))
       .accounts({
         stakeDetails: stake_details,
         tokenMint: token_mint,
@@ -171,7 +175,7 @@ describe("anchor-staking-nft", () => {
 
   it("Stake NFT", async () => {
     const tx = await program.methods
-      .stake(2)
+      .stake(1)
       .accounts({
         stakeDetails: stake_details,
         nftAuthority: nft_authority,
@@ -207,7 +211,6 @@ describe("anchor-staking-nft", () => {
     let parsed_tx = await provider.connection.getParsedTransaction(tx, {
       commitment: "confirmed",
     });
-    console.log(parsed_tx.blockTime);
 
     user_token_address = await associatedAddress({
       mint: token_mint,
@@ -217,8 +220,9 @@ describe("anchor-staking-nft", () => {
       provider.connection,
       user_token_address
     );
+    console.log(parsed_tx.blockTime);
 
-    console.log("token amount", user_token_account.amount.toString());
+    console.log("token amount", Number(user_token_account.amount) / decimals);
   });
   it("Unstake NFT", async () => {
     await program.methods
