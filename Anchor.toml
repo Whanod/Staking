@@ -26,6 +26,10 @@ upgradeable = false
 address = "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
 program = "metaplex_token_metadata_program.so"
 
+[[test.genesis]]
+address = "auth9SigNpDKz4sJJ1DfCTuZrZNSAgh9sFD3rboVmgg"
+program = "auth.so"
+
 [test.validator]
 bind_address = "0.0.0.0"
 url = "https://api.devnet.solana.com"
@@ -34,3 +38,7 @@ rpc_port = 8899
 
 [workspace]
 types = "app/src/idl/"
+
+[[test.validator.account]]
+address = "AXGujE6T556PjoN8yXpN74hQj8uB9B9YDNyCcryLeizW"
+filename = "rules.json"

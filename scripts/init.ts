@@ -10,13 +10,13 @@ import { IDL } from "../app/src/idl/staking";
 import { BN } from "bn.js";
 
 const main = async () => {
-  const connection = new Connection(clusterApiUrl("devnet"), {
+  const connection = new Connection(clusterApiUrl("mainnet-beta"), {
     commitment: "confirmed",
   });
 
   const tokenMintAccount = process.env.TOKEN_MINT_ACCOUNT;
 
-  const TokenOwner = getKeypairFromEnvironment("SECRET_KEY");
+  const TokenOwner = getKeypairFromEnvironment("MAIN");
   const wallet = new Wallet(TokenOwner);
   const collectionAddress = new PublicKey(process.env.COLLECTION_ADDRESS);
   const provider = new AnchorProvider(connection, wallet, {});
@@ -50,6 +50,7 @@ const main = async () => {
       tokenAuthority: token_authority,
     })
     .rpc({ commitment: "confirmed" });
+  console.log(stake_details);
   console.log(tx);
 };
 main();

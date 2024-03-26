@@ -16,9 +16,10 @@ import {
   mintTo,
 } from "@solana/spl-token";
 import { createCreateMetadataAccountV3Instruction } from "@metaplex-foundation/mpl-token-metadata";
+import { publicKey } from "@project-serum/anchor/dist/cjs/utils";
 const main = async () => {
-  let senderKey = getKeypairFromEnvironment("SECRET_KEY");
-  const connection = new Connection(clusterApiUrl("devnet"), {
+  let senderKey = getKeypairFromEnvironment("MAIN");
+  const connection = new Connection(clusterApiUrl("mainnet-beta"), {
     commitment: "confirmed",
   });
   const metaplex = new Metaplex(connection);
@@ -43,9 +44,9 @@ const main = async () => {
       {
         createMetadataAccountArgsV3: {
           data: {
-            name: "Furries",
+            name: "Fur",
             symbol: "Fur",
-            uri: "",
+            uri: "https://bafkreifh4feyttismhzlhdptelpxcqj64rc22bfkhg6pgegvz2o6hty57u.ipfs.nftstorage.link/",
             sellerFeeBasisPoints: 0,
             collection: null,
             creators: null,

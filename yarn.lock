@@ -47,7 +47,7 @@
 
 "@digitak/esrun@^3.2.24":
   version "3.2.26"
-  resolved "https://registry.yarnpkg.com/@digitak/esrun/-/esrun-3.2.26.tgz#840ac76c1e5c314aa735432884335e1acdcb2b45"
+  resolved "https://registry.npmjs.org/@digitak/esrun/-/esrun-3.2.26.tgz"
   integrity sha512-mL0bw7NhKVghp7mVsPwnAMhCn4NGAsk0KKFmAfnrYAZ/QCXR5xLXIYP82zLMjcsQag8DD6i1c+Yrm/57StYVzg==
   dependencies:
     "@digitak/grubber" "^3.1.4"
@@ -716,7 +716,7 @@
     "@solana/spl-token" "^0.3.6"
     "@solana/web3.js" "^1.66.2"
 
-"@metaplex-foundation/mpl-token-metadata@^2.11.0", "@metaplex-foundation/mpl-token-metadata@^2.12.0", "@metaplex-foundation/mpl-token-metadata@^2.5.2":
+"@metaplex-foundation/mpl-token-metadata@^2.11.0", "@metaplex-foundation/mpl-token-metadata@^2.13.0", "@metaplex-foundation/mpl-token-metadata@^2.5.2":
   version "2.13.0"
   resolved "https://registry.npmjs.org/@metaplex-foundation/mpl-token-metadata/-/mpl-token-metadata-2.13.0.tgz"
   integrity sha512-Fl/8I0L9rv4bKTV/RAl5YIbJe9SnQPInKvLz+xR1fEc4/VQkuCn3RPgypfUMEKWmCznzaw4sApDxy6CFS4qmJw==
@@ -894,7 +894,7 @@
 
 "@project-serum/anchor@^0.26.0":
   version "0.26.0"
-  resolved "https://registry.yarnpkg.com/@project-serum/anchor/-/anchor-0.26.0.tgz#99e15a3923a5d10514f8185b2d3909e5699d60d5"
+  resolved "https://registry.npmjs.org/@project-serum/anchor/-/anchor-0.26.0.tgz"
   integrity sha512-Nq+COIjE1135T7qfnOHEn7E0q39bQTgXLFk837/rgFe6Hkew9WML7eHsS+lSYD2p3OJaTiUOHTAq1lHy36oIqQ==
   dependencies:
     "@coral-xyz/borsh" "^0.26.0"
@@ -957,7 +957,7 @@
 
 "@solana-developers/node-helpers@^1.2.2":
   version "1.2.2"
-  resolved "https://registry.yarnpkg.com/@solana-developers/node-helpers/-/node-helpers-1.2.2.tgz#cb77d44b6742911c0705eef655e0f183175df511"
+  resolved "https://registry.npmjs.org/@solana-developers/node-helpers/-/node-helpers-1.2.2.tgz"
   integrity sha512-jTHlAJuTefCgoBlqDoCblKgHntpSV6IMOQzZnVOjNLxSBsHJxglvnFWzhjhvT7TGmmeZTc5F1PEeb9+gXGwjLw==
   dependencies:
     "@digitak/esrun" "^3.2.24"
@@ -1859,7 +1859,7 @@ dotenv@10.0.0:
 
 dotenv@^16.3.1:
   version "16.4.5"
-  resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-16.4.5.tgz#cdd3b3b604cb327e286b4762e13502f717cb099f"
+  resolved "https://registry.npmjs.org/dotenv/-/dotenv-16.4.5.tgz"
   integrity sha512-ZmdL2rui+eB2YwhsWzjInR8LldtZHGDoQ1ugH85ppHKwpUHL7j7rN0Ti9NCnGiQbhaZ11FpR+7ao1dNsmduNUg==
 
 elliptic@6.5.4, elliptic@^6.5.4:
@@ -2812,7 +2812,7 @@ prettier@^2.6.2:
 
 prettier@^3.0.3:
   version "3.2.5"
-  resolved "https://registry.yarnpkg.com/prettier/-/prettier-3.2.5.tgz#e52bc3090586e824964a8813b09aba6233b28368"
+  resolved "https://registry.npmjs.org/prettier/-/prettier-3.2.5.tgz"
   integrity sha512-3/GWa9aOC0YeD7LUfvOG2NiDyhOWRvt1k+rcKhOuYnMY24iiCphgneUfJDyFXd6rZCAnuLBv6UeAULtrhT/F4A==
 
 proxy-from-env@^1.1.0:
@@ -3187,7 +3187,7 @@ typescript@^4.3.5:
 
 typescript@^5.2.2:
   version "5.3.3"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-5.3.3.tgz#b3ce6ba258e72e6305ba66f5c9b452aaee3ffe37"
+  resolved "https://registry.npmjs.org/typescript/-/typescript-5.3.3.tgz"
   integrity sha512-pXWcraxM0uxAS+tN0AG/BF2TyqmHO014Z070UsJ+pFvYuRSq8KH8DmWpnbXe0pEPDHXZV3FcAbJkijJ5oNEnWw==
 
 undici-types@~5.26.4:

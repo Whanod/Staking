@@ -7,3 +7,5 @@ node_modules
 test-ledger
 .yarn
 .env
+fid.json
+eph.id

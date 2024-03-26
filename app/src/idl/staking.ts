@@ -78,7 +78,7 @@ export type Staking = {
         },
         {
           "name": "nftMint",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false
         },
         {
@@ -97,8 +97,18 @@ export type Staking = {
           "isSigner": false
         },
         {
-          "name": "nftMetadata",
+          "name": "metadataProgram",
           "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "sysvarInstructions",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "nftMetadata",
+          "isMut": true,
           "isSigner": false
         },
         {
@@ -114,6 +124,26 @@ export type Staking = {
         {
           "name": "nftCustody",
           "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "authRules",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenRecord",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenRecordDest",
+          "isMut": false,
           "isSigner": false
         }
       ],
@@ -642,7 +672,7 @@ export const IDL: Staking = {
         },
         {
           "name": "nftMint",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false
         },
         {
@@ -661,8 +691,18 @@ export const IDL: Staking = {
           "isSigner": false
         },
         {
-          "name": "nftMetadata",
+          "name": "metadataProgram",
           "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "sysvarInstructions",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "nftMetadata",
+          "isMut": true,
           "isSigner": false
         },
         {
@@ -678,6 +718,26 @@ export const IDL: Staking = {
         {
           "name": "nftCustody",
           "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "authRules",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenRecord",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenRecordDest",
+          "isMut": false,
           "isSigner": false
         }
       ],

@@ -1,7 +1,7 @@
 import * as anchor from "@project-serum/anchor";
 import { exec } from "child_process";
 import { utils, BN } from "@project-serum/anchor";
-import { PublicKey } from "@solana/web3.js";
+import { PublicKey, SYSVAR_INSTRUCTIONS_PUBKEY } from "@solana/web3.js";
 import { Program } from "@project-serum/anchor";
 
 import * as spl from "@solana/spl-token";
@@ -13,6 +13,7 @@ import { getKeypairFromEnvironment } from "@solana-developers/node-helpers";
 import {
   Metaplex,
   Signer,
+  ThawDelegatedNftInput,
   amount,
   mockStorage,
   toBigNumber,
@@ -21,6 +22,13 @@ import {
 import { associatedAddress } from "@project-serum/anchor/dist/cjs/utils/token";
 import { findProgramAddressSync } from "@project-serum/anchor/dist/cjs/utils/pubkey";
 import { expect } from "chai";
+import {
+  AuthorizationTokenAccountOwnerMismatchError,
+  TokenRecord,
+  TokenStandard,
+  ruleSetToggleBeet,
+} from "@metaplex-foundation/mpl-token-metadata";
+import { publicKey } from "@coral-xyz/anchor/dist/cjs/utils";
 
 describe("anchor-staking-nft", () => {
   // Configure the client to use the local cluster.
@@ -50,6 +58,10 @@ describe("anchor-staking-nft", () => {
   let token;
   let user_token_address;
   let decimals = 1_000_000;
+  let pnft;
+  let rules = new PublicKey("AXGujE6T556PjoN8yXpN74hQj8uB9B9YDNyCcryLeizW");
+  let token_record: PublicKey;
+  let token_record_dest: PublicKey;
   it("Is initialized!", async () => {
     const program = anchor.workspace.Staking as Program<Staking>;
 
@@ -79,11 +91,15 @@ describe("anchor-staking-nft", () => {
         name: "fr1",
         sellerFeeBasisPoints: 30,
         collection: collection.mintAddress,
+        tokenStandard: TokenStandard.ProgrammableNonFungible,
+        ruleSet: rules,
       },
+
       {
         commitment: "finalized",
       }
     );
+    pnft = nft;
 
     let out = await meta.nfts().verifyCollection(
       {
@@ -93,6 +109,7 @@ describe("anchor-staking-nft", () => {
       },
       { commitment: "finalized" }
     );
+    console.log(nft.edition.address);
     let verified_nft = await meta
       .nfts()
       .findByMint({ mintAddress: nft.mint.address });
@@ -103,6 +120,7 @@ describe("anchor-staking-nft", () => {
       mint: nft_mint,
       owner: provider.wallet.publicKey,
     });
+
     nft_edition = nft.edition.address;
     collection_address = collection.mintAddress;
 
@@ -143,6 +161,16 @@ describe("anchor-staking-nft", () => {
       [utils.bytes.utf8.encode("token-authority"), stake_details.toBytes()],
       programId
     );
+    let [freeze] = findProgramAddressSync(
+      [
+        utils.bytes.utf8.encode("metadata"),
+        new PublicKey("metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s").toBytes(),
+        nft_mint.toBytes(),
+        utils.bytes.utf8.encode("edition"),
+      ],
+      new PublicKey("metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s")
+    );
+
     [nft_authority] = PublicKey.findProgramAddressSync(
       [utils.bytes.utf8.encode("nft-authority"), stake_details.toBytes()],
       programId
@@ -160,6 +188,28 @@ describe("anchor-staking-nft", () => {
       ],
       programId
     );
+    [token_record] = findProgramAddressSync(
+      [
+        utils.bytes.utf8.encode("metadata"),
+        new PublicKey("metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s").toBytes(),
+        nft_mint.toBytes(),
+        utils.bytes.utf8.encode("token_record"),
+        nft_token.toBytes(),
+      ],
+      new PublicKey("metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s")
+    );
+    [token_record_dest] = findProgramAddressSync(
+      [
+        utils.bytes.utf8.encode("metadata"),
+        new PublicKey("metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s").toBytes(),
+        nft_mint.toBytes(),
+        utils.bytes.utf8.encode("token_record"),
+        nft_custody.toBytes(),
+      ],
+      new PublicKey("metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s")
+    );
+
+    console.log(nft.json);
 
     let tx = await program.methods
       .init(new BN(50))
@@ -174,9 +224,22 @@ describe("anchor-staking-nft", () => {
   });
 
   it("Stake NFT", async () => {
+    console.log(pnft.programmableConfig.ruleSet);
+
     const tx = await program.methods
       .stake(1)
       .accounts({
+        metadataProgram: new PublicKey(
+          "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
+        ),
+        authProgram: new PublicKey(
+          "auth9SigNpDKz4sJJ1DfCTuZrZNSAgh9sFD3rboVmgg"
+        ),
+
+        tokenRecord: token_record,
+        tokenRecordDest: token_record_dest,
+        authRules: rules,
+        sysvarInstructions: SYSVAR_INSTRUCTIONS_PUBKEY,
         stakeDetails: stake_details,
         nftAuthority: nft_authority,
         stakingRecord: staking_record,
@@ -187,11 +250,14 @@ describe("anchor-staking-nft", () => {
         nftCustody: nft_custody,
       })
 
-      .rpc({ commitment: "confirmed" });
-    let parsed_tx = await provider.connection.getParsedTransaction(tx, {
-      commitment: "confirmed",
-    });
-    console.log(parsed_tx.blockTime);
+      .rpc({ commitment: "confirmed" })
+      .catch((err) => console.error(err));
+    if (tx) {
+      let parsed_tx = await provider.connection.getParsedTransaction(tx, {
+        commitment: "confirmed",
+      });
+      console.log(parsed_tx.blockTime);
+    }
   });
   const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
 
