@@ -74,11 +74,11 @@ export type Staking = {
         {
           "name": "staker",
           "isMut": true,
-          "isSigner": true
+          "isSigner": false
         },
         {
           "name": "nftMint",
-          "isMut": true,
+          "isMut": false,
           "isSigner": false
         },
         {
@@ -138,12 +138,12 @@ export type Staking = {
         },
         {
           "name": "tokenRecord",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false
         },
         {
           "name": "tokenRecordDest",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false
         }
       ],
@@ -209,6 +209,16 @@ export type Staking = {
       "name": "unstake",
       "accounts": [
         {
+          "name": "metadataProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "sysvarInstructions",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
           "name": "stakeDetails",
           "isMut": false,
           "isSigner": false
@@ -250,7 +260,7 @@ export type Staking = {
         },
         {
           "name": "nftAuthority",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false
         },
         {
@@ -271,6 +281,36 @@ export type Staking = {
         {
           "name": "tokenProgram",
           "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "nftMetadata",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "nftEdition",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "authProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "authRules",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenRecord",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenRecordDest",
+          "isMut": true,
           "isSigner": false
         }
       ],
@@ -668,11 +708,11 @@ export const IDL: Staking = {
         {
           "name": "staker",
           "isMut": true,
-          "isSigner": true
+          "isSigner": false
         },
         {
           "name": "nftMint",
-          "isMut": true,
+          "isMut": false,
           "isSigner": false
         },
         {
@@ -732,12 +772,12 @@ export const IDL: Staking = {
         },
         {
           "name": "tokenRecord",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false
         },
         {
           "name": "tokenRecordDest",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false
         }
       ],
@@ -803,6 +843,16 @@ export const IDL: Staking = {
       "name": "unstake",
       "accounts": [
         {
+          "name": "metadataProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "sysvarInstructions",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
           "name": "stakeDetails",
           "isMut": false,
           "isSigner": false
@@ -844,7 +894,7 @@ export const IDL: Staking = {
         },
         {
           "name": "nftAuthority",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false
         },
         {
@@ -865,6 +915,36 @@ export const IDL: Staking = {
         {
           "name": "tokenProgram",
           "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "nftMetadata",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "nftEdition",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "authProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "authRules",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenRecord",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenRecordDest",
+          "isMut": true,
           "isSigner": false
         }
       ],

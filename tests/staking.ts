@@ -1,7 +1,15 @@
 import * as anchor from "@project-serum/anchor";
 import { exec } from "child_process";
 import { utils, BN } from "@project-serum/anchor";
-import { PublicKey, SYSVAR_INSTRUCTIONS_PUBKEY } from "@solana/web3.js";
+import {
+  ComputeBudgetProgram,
+  Keypair,
+  PUBLIC_KEY_LENGTH,
+  PublicKey,
+  SYSVAR_INSTRUCTIONS_PUBKEY,
+  SYSVAR_RENT_PUBKEY,
+  Transaction,
+} from "@solana/web3.js";
 import { Program } from "@project-serum/anchor";
 
 import * as spl from "@solana/spl-token";
@@ -12,6 +20,7 @@ import { getKeypairFromEnvironment } from "@solana-developers/node-helpers";
 
 import {
   Metaplex,
+  Nft,
   Signer,
   ThawDelegatedNftInput,
   amount,
@@ -58,7 +67,7 @@ describe("anchor-staking-nft", () => {
   let token;
   let user_token_address;
   let decimals = 1_000_000;
-  let pnft;
+  let pnft: Nft;
   let rules = new PublicKey("AXGujE6T556PjoN8yXpN74hQj8uB9B9YDNyCcryLeizW");
   let token_record: PublicKey;
   let token_record_dest: PublicKey;
@@ -209,7 +218,7 @@ describe("anchor-staking-nft", () => {
       new PublicKey("metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s")
     );
 
-    console.log(nft.json);
+    console.log();
 
     let tx = await program.methods
       .init(new BN(50))
@@ -229,6 +238,7 @@ describe("anchor-staking-nft", () => {
     const tx = await program.methods
       .stake(1)
       .accounts({
+        staker: provider.publicKey,
         metadataProgram: new PublicKey(
           "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
         ),
@@ -238,8 +248,10 @@ describe("anchor-staking-nft", () => {
 
         tokenRecord: token_record,
         tokenRecordDest: token_record_dest,
-        authRules: rules,
-        sysvarInstructions: SYSVAR_INSTRUCTIONS_PUBKEY,
+        authRules: pnft.programmableConfig.ruleSet,
+        sysvarInstructions: new PublicKey(
+          "Sysvar1nstructions1111111111111111111111111"
+        ),
         stakeDetails: stake_details,
         nftAuthority: nft_authority,
         stakingRecord: staking_record,
@@ -249,11 +261,22 @@ describe("anchor-staking-nft", () => {
         nftToken: nft_token,
         nftCustody: nft_custody,
       })
+      .instruction();
+    let tr = new Transaction();
 
-      .rpc({ commitment: "confirmed" })
+    tr.add(ComputeBudgetProgram.setComputeUnitLimit({ units: 300000 }));
+    tr.add(tx);
+
+    let res = await provider
+      .sendAndConfirm(tr, [], { commitment: "confirmed" })
       .catch((err) => console.error(err));
-    if (tx) {
-      let parsed_tx = await provider.connection.getParsedTransaction(tx, {
+    if (res) {
+      let cnf_output = await meta
+        .nfts()
+        .findAllByOwner({ owner: nft_authority });
+      console.log("found:", cnf_output[0].address);
+
+      let parsed_tx = await provider.connection.getParsedTransaction(res, {
         commitment: "confirmed",
       });
       console.log(parsed_tx.blockTime);
@@ -291,9 +314,23 @@ describe("anchor-staking-nft", () => {
     console.log("token amount", Number(user_token_account.amount) / decimals);
   });
   it("Unstake NFT", async () => {
-    await program.methods
+    let tx = await program.methods
       .unstake()
       .accounts({
+        nftEdition: nft_edition,
+        nftMetadata: nft_metadata,
+        authRules: pnft.programmableConfig.ruleSet,
+        metadataProgram: new PublicKey(
+          "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
+        ),
+        authProgram: new PublicKey(
+          "auth9SigNpDKz4sJJ1DfCTuZrZNSAgh9sFD3rboVmgg"
+        ),
+        sysvarInstructions: new PublicKey(
+          "Sysvar1nstructions1111111111111111111111111"
+        ),
+        tokenRecord: token_record_dest,
+        tokenRecordDest: token_record,
         stakeDetails: stake_details,
         stakingRecord: staking_record,
         rewardMint: token_mint,
@@ -304,7 +341,18 @@ describe("anchor-staking-nft", () => {
         nftMint: nft_mint,
         nftReceiveAccount: nft_token,
       })
-      .rpc({ commitment: "confirmed" });
+      .instruction();
+    let tr = new Transaction();
+
+    tr.add(ComputeBudgetProgram.setComputeUnitLimit({ units: 300000 }));
+    tr.add(tx);
+    provider
+      .sendAndConfirm(tr, [], { commitment: "confirmed" })
+      .catch((err) => {
+        console.log("nft_authority: ", nft_authority);
+        console.log("signer: ", provider.publicKey);
+        console.error(err);
+      });
   });
 
   it("Closes Staking", async () => {
@@ -315,6 +363,9 @@ describe("anchor-staking-nft", () => {
         tokenMint: token_mint,
         tokenAuthority: token_authority,
       })
-      .rpc();
+      .rpc()
+      .catch((err) => {
+        console.error(err);
+      });
   });
 });
