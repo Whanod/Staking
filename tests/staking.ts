@@ -233,8 +233,6 @@ describe("anchor-staking-nft", () => {
   });
 
   it("Stake NFT", async () => {
-    console.log(pnft.programmableConfig.ruleSet);
-
     const tx = await program.methods
       .stake(1)
       .accounts({

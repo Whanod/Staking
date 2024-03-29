@@ -74,7 +74,7 @@ export type Staking = {
         {
           "name": "staker",
           "isMut": true,
-          "isSigner": false
+          "isSigner": true
         },
         {
           "name": "nftMint",
@@ -708,7 +708,7 @@ export const IDL: Staking = {
         {
           "name": "staker",
           "isMut": true,
-          "isSigner": false
+          "isSigner": true
         },
         {
           "name": "nftMint",
